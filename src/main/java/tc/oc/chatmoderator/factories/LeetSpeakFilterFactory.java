@@ -55,7 +55,16 @@ public class LeetSpeakFilterFactory {
         ConfigurationSection dictionarySection = this.plugin.getConfig().getConfigurationSection(path);
 
         for(Map.Entry<String, Object> entry : dictionarySection.getValues(false).entrySet()) {
-            Character reference = entry.getKey().charAt(0);
+            Character reference = null;
+
+            try {
+                reference = entry.getKey().charAt(0);
+            } catch (NullPointerException e) {
+                plugin.getLogger().severe("Leet-speak entry " + entry.getKey() + " was not able to be parsed.");
+                e.printStackTrace();
+                continue;
+            }
+
             ArrayList<Pattern> translations = new ArrayList<>();
 
             for (String s : (ArrayList<String>) entry.getValue()) {
@@ -63,6 +72,7 @@ public class LeetSpeakFilterFactory {
                     translations.add(Pattern.compile(Pattern.quote(s)));
                 } catch (PatternSyntaxException e) {
                     plugin.getLogger().info("Error parsing: " + reference.toString() + " - " + s);
+                    e.printStackTrace();
                 }
             }
 
