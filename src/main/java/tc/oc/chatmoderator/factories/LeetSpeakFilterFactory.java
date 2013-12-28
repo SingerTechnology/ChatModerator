@@ -2,8 +2,10 @@ package tc.oc.chatmoderator.factories;
 
 import com.google.common.base.Preconditions;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import tc.oc.chatmoderator.ChatModeratorPlugin;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,21 +29,29 @@ public class LeetSpeakFilterFactory {
     private Map<Character, List<Pattern>> dictionary;
 
     /**
-     * The path to search on in the config.
+     * The path to search on in the dictionary.
      */
     private String path;
+
+    /**
+     * The file to use as reference when searching in the dictionary.
+     */
+    private File dictionaryFile;
 
     /**
      * Available constructor for creating the LeetSpeakFilterFactory object.
      *
      * @param plugin The base plugin.
      * @param path The path to search on in the config.
+     * @param file The dictionary file to use as reference.
      */
-    public LeetSpeakFilterFactory(ChatModeratorPlugin plugin, String path) {
+    public LeetSpeakFilterFactory(ChatModeratorPlugin plugin, File file, String path) {
         Preconditions.checkArgument(plugin.isEnabled(), "Plugin not enabled!");
+        Preconditions.checkArgument(file.exists(), "Dictionary file does not exist!");
 
         this.plugin = Preconditions.checkNotNull(plugin, "plugin");
         this.path = Preconditions.checkNotNull(path);
+        this.dictionaryFile = file;
 
         this.dictionary = new HashMap<>();
     }
@@ -52,7 +62,7 @@ public class LeetSpeakFilterFactory {
      * @return The state of the {@link tc.oc.chatmoderator.factories.LeetSpeakFilterFactory} object.
      */
     public LeetSpeakFilterFactory build() {
-        ConfigurationSection dictionarySection = this.plugin.getConfig().getConfigurationSection(path);
+        ConfigurationSection dictionarySection = new YamlConfiguration().loadConfiguration(dictionaryFile).getConfigurationSection(path);
 
         for(Map.Entry<String, Object> entry : dictionarySection.getValues(false).entrySet()) {
             Character reference = null;
